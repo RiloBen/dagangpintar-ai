@@ -125,7 +125,7 @@ masih manual dan tidak efisien:
 | **Metrik** | **Target** | **Cara Ukur** |
 |-----------------------------------------------|----------------------------------------------------------------------------------------------|-------------------------------------------------------------|
 | Latency rata-rata /interact | < 1.5 detik | Load test lokal + monitoring saat demo |
-| Akurasi prediksi restok (Fitur 1) | Directionally correct pada skenario demo (hari pasar, tanggal muda terdeteksi benar) | Perbandingan output model vs skenario master yang disiapkan |
+| Akurasi prediksi restok (Fitur 1) | Directionally correct pada skenario demo (hari pasar, tanggal muda terdeteksi benar); R² ≥ 85%, MAE < 0.8 unit, RMSE < 1.0 unit | Evaluasi Test Set (360 hari data historis) + Perbandingan output model vs skenario master |
 | Tingkat keberhasilan negosiasi tanpa handover | Agent mampu menyelesaikan negosiasi standar tanpa eskalasi manusia pada skenario non-ekstrem | Testing skenario percakapan yang telah disiapkan |
 | Kepatuhan floor price | 0% pelanggaran — AI tidak pernah menyetujui harga di bawah floor price | Automated test rule engine + manual review log transaksi |
 | Uptime saat sesi demo | 100% selama slot evaluasi juri | Observasi langsung + fallback plan |
@@ -173,7 +173,8 @@ LightGBM.
 
 | **Pertimbangan** | **Justifikasi** |
 |--------------------|---------------------------------------------------------------------------------------------------------------------------------------|
-| Ukuran dataset | Dataset kompetisi diperkirakan kecil; Random Forest lebih robust terhadap overfitting pada dataset kecil dibanding gradient boosting. |
+| Ukuran & Karakteristik dataset | Dataset menggunakan 360 hari (1 tahun) histori POS dengan fitur temporal (is_hari_pasar, is_tanggal_muda, past_7day_avg); Random Forest lebih robust terhadap overfitting dibanding gradient boosting. |
+| Metodologi MLOps Hybrid | R&D, visualisasi kurva, dan evaluasi metrik (MAE, RMSE, R²) dilakukan di Jupyter Notebook, lalu model diexport sebagai artifact .pkl untuk inference instan di backend. |
 | Constraint memori | RAM container dibagi dengan komponen Fitur 3; Random Forest lebih ringan dan predictable saat inference. |
 | Waktu pengembangan | Minim tuning hyperparameter dibanding LightGBM, menghemat waktu tim AI/ML untuk fokus ke Fitur 3. |
 
@@ -313,25 +314,16 @@ seperti check_stock() dan evaluate_offer() terpisah) untuk menghemat
 token overhead dan mempertahankan target latency di bawah 1.5 detik,
 karena setiap tool call tambahan berarti round-trip API tambahan.
 
-**Alur Data Teknis (Single Endpoint REST API)**
+**Alur Data Teknis (Single Endpoint REST API & State Management)**
 
-4. Input Payload (POST /api/v1/interact): user_id, message_text,
- sku_context.
-
-5. Text Normalization: "38rb" → 38000, "50 dus" → 50.
-
-6. Real-time DB Read Sync: available_stock, floor_price, normal_price.
-
-7. LLM menerima pesan pembeli, menginisiasi pemanggilan tool
- process_negotiation.
-
-8. Rule Engine mengevaluasi: offered_price vs floor_price, quantity vs
- bulk_threshold → menghasilkan action_type dan suggested_price.
-
-9. LLM men-generate kalimat respons akhir berdasarkan hasil tool (NLG).
-
-10. Output Payload: ai_response_text, action_type, suggested_price,
- inventory_status, handover_flag.
+1. Input Payload (POST /api/v1/interact): user_id, message_text, sku_id.
+2. Text Normalization: Regex normalizer membersihkan singkatan ("38rb" → 38000, "50 dus" → 50).
+3. Real-time DB Read Sync: Membaca available_stock, floor_price, normal_price, dan status sesi (tabel negotiation_sessions).
+4. LLM menerima pesan pembeli, menginisiasi pemanggilan tool process_negotiation(offered_price, quantity).
+5. Rule Engine mengevaluasi: offered_price vs floor_price, quantity vs available_stock → mengembalikan status (ACCEPT, COUNTER, REJECT, HANDOVER) dan harga penawaran balik.
+6. Handover & Invoice Processing: Jika penawaran < floor_price 3x berturut-turut, picu status HANDOVER ke Pak Jono. Jika DEAL (ACCEPT), generate rekaman Invoice Draft di tabel invoice_drafts (valid 2 jam).
+7. LLM men-generate kalimat respons akhir natural (NLG) berdasarkan hasil tool.
+8. Output Payload: ai_response_text, action_type, suggested_price, handover_flag, invoice_draft.
 
 **7.4 Kepatuhan & Aspek Legal**
 

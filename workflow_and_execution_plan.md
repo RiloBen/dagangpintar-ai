@@ -4,7 +4,7 @@
 
 > **Dokumen Resmi Acuan Tim (Single Source of Truth)**  
 > Versi: 2.0 | Status: Updated & Validated untuk Penyisihan COMPFEST  
-> Dokumen ini merefleksikan seluruh kebutuhan teknis dari `PRD_DagangPintar_AI.md`, mencakup integrasi ML Random Forest, Google Gemini API Native Tool Calling, Database Persistence MySQL, Hybrid Handover, serta Invoice Draft Berbatas Waktu.
+> Dokumen ini merefleksikan seluruh kebutuhan teknis dari `PRD.md`, mencakup integrasi ML Random Forest, Google Gemini API Native Tool Calling, Database Persistence MySQL, Hybrid Handover, serta Invoice Draft Berbatas Waktu.
 
 ---
 
@@ -53,7 +53,7 @@ Setiap jobdesk memiliki area kerja (*folder scope*) yang terisolasi ketat untuk 
 | **DevOps / Infra** | `docker/`, `docker-compose.yml` | `init.sql`, `docker-compose.yml`, `Dockerfile` |
 
 ### **3. Prinsip Contract-First (Acuan Tunggal Interaksi)**
-* Skema Database (`init.sql`) dan Kontrak API (`/api/v1/interact` & `/api/v1/restock-recommendation`) pada dokumen `Rencana Eksekusi Sekuensial.md` ini adalah **Acuan Resmi (Single Source of Truth)**.
+* Skema Database (`init.sql`) dan Kontrak API (`/api/v1/interact` & `/api/v1/restock-recommendation`) pada dokumen `workflow_and_execution_plan.md` ini adalah **Acuan Resmi (Single Source of Truth)**.
 * Jika Backend atau Frontend perlu merubah payload JSON / parameter, perubahan tersebut **WAJIB didiskusikan dan di-update di dokumen acuan ini terlebih dahulu** sebelum mengubah kode.
 
 ### **4. Strategi Git Branching (Git Flow)**
@@ -316,7 +316,11 @@ python-dotenv==1.0.1
 
 ---
 
-### **Langkah 3.2: Skrip Pelatihan Model ML (Fitur 1)**
+### **Langkah 3.2: Tahap Riset & Pelatihan Model ML (Fitur 1)**
+
+> **Alur Kerja Riset (MLOps Hybrid)**:  
+> 1. **Tahap R&D / Eksperimen**: AI/ML Engineer melakukan eksplorasi data sintetis 360 hari (1 Tahun), tuning hyperparameter, evaluasi metrik (`MAE`, `R2`), dan visualisasi grafik pada Jupyter Notebook (`notebooks/fitur1_demand_prediction_eval.ipynb`).  
+> 2. **Tahap Export & Serving**: Setelah metrik $R^2 > 85\%$ tercapai, model diexport ke `apps/backend/app/ml/demand_rf_model.pkl` untuk dibaca oleh FastAPI Backend via `train_model.py`.
 
 Buat file `apps/backend/app/ml/train_model.py`:
 
@@ -326,27 +330,42 @@ import joblib
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 
-def train_demand_model():
+def generate_synthetic_pos_data(n_days=360):
     """
-    Melatih model Random Forest berbasis fitur temporal:
-    [is_hari_pasar (0/1), is_tanggal_muda (0/1), past_7day_avg] -> Demand_pred
+    Menghasilkan 360 data transaksi harian sintetis (1 tahun) 
+    berdasarkan pola ekonomi warung
     """
-    # Dataset Sintetis POS Historis
-    X = np.array([
-        [0, 0, 4.0], [0, 1, 6.0], [1, 0, 7.0], [1, 1, 9.0],
-        [0, 0, 3.5], [1, 0, 6.5], [1, 1, 8.5], [0, 1, 5.5],
-        [1, 1, 9.5], [0, 0, 3.0]
-    ])
-    # Demand aktual
-    y = np.array([4.0, 6.0, 7.0, 9.0, 3.5, 6.5, 8.5, 5.5, 9.5, 3.0])
+    np.random.seed(42)
+    
+    is_hari_pasar = np.random.choice([0, 1], size=n_days, p=[5/7, 2/7])
+    day_of_month = np.tile(np.arange(1, 31), n_days // 30 + 1)[:n_days]
+    is_tanggal_muda = np.where((day_of_month >= 25) | (day_of_month <= 5), 1, 0)
+    
+    past_7day_avg = np.random.normal(loc=5.5, scale=1.2, size=n_days)
+    past_7day_avg = np.clip(past_7day_avg, 2.0, 12.0)
+    
+    X = np.column_stack((is_hari_pasar, is_tanggal_muda, past_7day_avg))
+    
+    baseline = 4.0
+    pasar_effect = is_hari_pasar * 3.0
+    payday_effect = is_tanggal_muda * 2.0
+    noise = np.random.normal(0, 0.5, size=n_days)
+    
+    y = baseline + pasar_effect + payday_effect + (past_7day_avg * 0.2) + noise
+    y = np.clip(y, 1.0, 15.0)
+    
+    return X, y
 
-    model = RandomForestRegressor(n_estimators=10, random_state=42)
+def train_demand_model():
+    X, y = generate_synthetic_pos_data(n_days=360)
+    
+    model = RandomForestRegressor(n_estimators=50, max_depth=5, random_state=42)
     model.fit(X, y)
 
     os.makedirs("app/ml", exist_ok=True)
     model_path = "app/ml/demand_rf_model.pkl"
     joblib.dump(model, model_path)
-    print(f"Model Random Forest berhasil dilatih dan disimpan di: {model_path}")
+    print(f"Model Random Forest berhasil dilatih dengan {len(X)} data historis (1 Tahun) dan disimpan di: {model_path}")
 
 if __name__ == "__main__":
     train_demand_model()
