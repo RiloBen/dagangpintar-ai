@@ -11,22 +11,22 @@
 ## **Ringkasan Tahapan Utama**
 
 ```
-[Tahap 1: Inisialisasi Monorepo & Konfigurasi Lingkungan]
+[Tahap 1: Inisialisasi Monorepo & Konfigurasi Lingkungan] ── [PIC: Anggota 2]
        │  
        ▼  
-[Tahap 2: Skema Database MySQL, Seed Data & State Tables]
+[Tahap 2: Skema Database MySQL, Seed Data & State] ─────── [PIC: Anggota 2]
        │  
        ▼  
-[Tahap 3: Pelatihan ML Random Forest & Backend Core FastAPI]
+[Tahap 3: Pelatihan ML Random Forest & Backend FastAPI] ── [PIC: Anggota 1]
        │  
        ▼  
-[Tahap 4: Agentic AI Engine & Tool Calling Gemini API (Tawar.AI)]
+[Tahap 4: Agentic AI Engine & Tool Calling Gemini API] ─── [PIC: Anggota 1]
        │  
        ▼  
-[Tahap 5: Frontend Chat-Centric PWA UI & Integrasi Dinamis]
+[Tahap 5: Frontend Chat-Centric PWA UI & Integrasi] ────── [PIC: Anggota 2]
        │  
        ▼  
-[Tahap 6: Orchestration Docker Compose & Deliverables Lomba]
+[Tahap 6: Orchestration Docker Compose & Submisi] ──────── [PIC: Kolaborasi Bersama]
 ```
 
 ---
@@ -36,21 +36,17 @@
 Untuk memastikan setiap anggota tim yang mengerjakan file *Implementation Plan* masing-masing tidak saling berbenturan (*conflict/tabrakan*), seluruh tim wajib mematuhi 4 aturan berikut:
 
 ### **1. Lokasi & Naming Convention File Implementation Plan**
-Seluruh file *Implementation Plan* per jobdesk disimpan dalam direktori `docs/plans/` dengan penamaan terisolasi:
-* **AI/ML Engineer**: `docs/plans/plan_aiml.md`
-* **Backend Engineer**: `docs/plans/plan_backend.md`
-* **Frontend Engineer**: `docs/plans/plan_frontend.md`
-* **DevOps / Infra**: `docs/plans/plan_devops.md`
+Seluruh file *Implementation Plan* per jobdesk disimpan dalam direktori `docs/plans/` dengan penamaan terisolasi (dikelola oleh 2 anggota tim):
+* **Anggota 1 (AI/ML & Backend Engineer)**: `docs/plans/plan_aiml.md` & `docs/plans/plan_backend.md`
+* **Anggota 2 (Frontend & DevOps/Infra)**: `docs/plans/plan_frontend.md` & `docs/plans/plan_devops.md`
 
 ### **2. Batas Kepemilikan File & Folder (File Ownership Boundaries)**
-Setiap jobdesk memiliki area kerja (*folder scope*) yang terisolasi ketat untuk menghindari merge conflict pada Git:
+Setiap anggota memiliki area kerja (*folder scope*) yang terisolasi ketat untuk menghindari merge conflict pada Git:
 
-| Role / Jobdesk | Folder Scope Acuan | File Utama yang Dikelola |
-|---|---|---|
-| **AI/ML Engineer** | `apps/backend/app/ml/` | `train_model.py`, `demand_rf_model.pkl` |
-| **Backend Engineer** | `apps/backend/app/api/`, `app/core/`, `app/db/` | `main.py`, `interact.py`, `rule_engine.py`, `session.py`, `text_normalizer.py` |
-| **Frontend Engineer** | `apps/frontend/` | `index.html`, `package.json`, `src/*` |
-| **DevOps / Infra** | `docker/`, `docker-compose.yml` | `init.sql`, `docker-compose.yml`, `Dockerfile` |
+| Anggota Tim | Role / Scope | Folder Scope Acuan | File Utama yang Dikelola |
+|---|---|---|---|
+| **Anggota 1** | **AI/ML Engineer + Backend Engineer** | `apps/backend/` | `app/api/*`, `app/core/*`, `app/db/*`, `app/models/*`, `app/services/*`, `app/ml/*`, `train_model.py`, `demand_rf_model.pkl` |
+| **Anggota 2** | **Frontend Engineer + DevOps / Infra** | `apps/frontend/`, `docker/`, root configs | `apps/frontend/index.html`, `apps/frontend/package.json`, `apps/frontend/src/*`, `docker/mysql/init.sql`, `docker-compose.yml`, `Dockerfile` |
 
 ### **3. Prinsip Contract-First (Acuan Tunggal Interaksi)**
 * Skema Database (`init.sql`) dan Kontrak API (`/api/v1/interact` & `/api/v1/restock-recommendation`) pada dokumen `workflow_and_execution_plan.md` ini adalah **Acuan Resmi (Single Source of Truth)**.
@@ -58,20 +54,18 @@ Setiap jobdesk memiliki area kerja (*folder scope*) yang terisolasi ketat untuk 
 
 ### **4. Strategi Git Branching (Git Flow)**
 * **`main`**: Branch stabil utama (dilarang *push* langsung ke `main`).
-* **Branch Fitur per Role**:
-  * AI/ML: `feat/ml-demand-model`
-  * Backend: `feat/backend-agentic-tooling`
-  * Frontend: `feat/frontend-chat-pwa`
-  * DevOps: `feat/devops-docker-compose`
+* **Branch Fitur per Anggota**:
+  * **Anggota 1**: `feat/core-backend-ml`
+  * **Anggota 2**: `feat/client-infra-ui`
 * Penggabungan kode dilakukan melalui **Pull Request (PR)** dengan pengujian lokal `docker-compose up` terlebih dahulu.
 
 ---
 
-## **Tahap 1: Inisialisasi Repositori & Struktur Monorepo**
+## **Tahap 1: Inisialisasi Repositori & Struktur Monorepo** `[PIC: Anggota 2 - Frontend & DevOps/Infra]`
 
 **Tujuan:** Menyiapkan struktur direktori proyek, repositori Git, dan file konfigurasi dasar pada komputer lokal yang mendukung backend FastAPI, modul ML, database MySQL, dan frontend PWA.
 
-### **Langkah 1.1: Buat Folder Proyek & Inisialisasi Git**
+### **Langkah 1.1: Buat Folder Proyek & Inisialisasi Git** `[PIC: Anggota 2]`
 
 Buka terminal (Command Prompt / PowerShell / Terminal Linux) dan jalankan perintah berikut secara berurutan:
 
@@ -98,7 +92,7 @@ mkdir -p docs/plans
 
 ---
 
-### **Langkah 1.2: Buat File Konfigurasi Dasar**
+### **Langkah 1.2: Buat File Konfigurasi Dasar** `[PIC: Anggota 2]`
 
 #### 1. Buat file `.gitignore` di root folder (`dagangpintar-ai/.gitignore`):
 
@@ -153,7 +147,7 @@ copy .env.example .env
 
 ---
 
-### **Verifikasi Tahap 1**
+### **Verifikasi Tahap 1** `[PIC: Anggota 2]`
 
 Jalankan perintah `git status`. Hasilnya harus menunjukkan struktur folder dan file `.gitignore` serta `.env.example` belum di-commit.
 
@@ -166,11 +160,11 @@ git commit -m "chore(repo): inisialisasi struktur monorepo dan konfigurasi dasar
 
 ---
 
-## **Tahap 2: Skema Database MySQL, Seed Data & State Tables**
+## **Tahap 2: Skema Database MySQL, Seed Data & State Tables** `[PIC: Anggota 2 - Frontend & DevOps/Infra]`
 
 **Tujuan:** Menyiapkan skema database relasional, data awal (*seed data*) skenario master (Bu Tejo & Pak Jono), serta tabel pelacak status negosiasi dan invoice.
 
-### **Langkah 2.1: Buat File Init SQL Database**
+### **Langkah 2.1: Buat File Init SQL Database** `[PIC: Anggota 2]`
 
 Buat file `docker/mysql/init.sql`:
 
@@ -234,7 +228,7 @@ CREATE TABLE IF NOT EXISTS invoice_drafts (
 
 ---
 
-### **Langkah 2.2: Service MySQL pada Docker Compose**
+### **Langkah 2.2: Service MySQL pada Docker Compose** `[PIC: Anggota 2]`
 
 Buat file `docker-compose.yml` di root folder (`dagangpintar-ai/docker-compose.yml`):
 
@@ -263,7 +257,7 @@ volumes:
 
 ---
 
-### **Verifikasi Tahap 2**
+### **Verifikasi Tahap 2** `[PIC: Anggota 2]`
 
 Jalankan container database MySQL:
 
@@ -294,11 +288,11 @@ git commit -m "feat(db): tambahkan skema database mysql, seed data skenario mast
 
 ---
 
-## **Tahap 3: Pelatihan ML Random Forest & Core Backend FastAPI**
+## **Tahap 3: Pelatihan ML Random Forest & Core Backend FastAPI** `[PIC: Anggota 1 - AI/ML & Backend]`
 
 **Tujuan:** Membangun model Machine Learning Random Forest untuk prediksi kebutuhan restok (Fitur 1), menyambungkan database MySQL via SQLAlchemy, dan mengimplementasikan Rule Engine deterministik (Fitur 2).
 
-### **Langkah 3.1: File Dependencies Backend**
+### **Langkah 3.1: File Dependencies Backend** `[PIC: Anggota 1]`
 
 Buat file `apps/backend/requirements.txt`:
 
@@ -316,7 +310,7 @@ python-dotenv==1.0.1
 
 ---
 
-### **Langkah 3.2: Tahap Riset & Pelatihan Model ML (Fitur 1)**
+### **Langkah 3.2: Tahap Riset & Pelatihan Model ML (Fitur 1)** `[PIC: Anggota 1]`
 
 > **Alur Kerja Riset (MLOps Hybrid)**:  
 > 1. **Tahap R&D / Eksperimen**: AI/ML Engineer melakukan eksplorasi data sintetis 360 hari (1 Tahun), tuning hyperparameter, evaluasi metrik (`MAE`, `R2`), dan visualisasi grafik pada Jupyter Notebook (`notebooks/fitur1_demand_prediction_eval.ipynb`).  
@@ -373,7 +367,7 @@ if __name__ == "__main__":
 
 ---
 
-### **Langkah 3.3: Koneksi Database ORM (`db/session.py`)**
+### **Langkah 3.3: Koneksi Database ORM (`db/session.py`)** `[PIC: Anggota 1]`
 
 Buat file `apps/backend/app/db/session.py`:
 
@@ -403,7 +397,7 @@ def get_db():
 
 ---
 
-### **Langkah 3.4: Rule Engine Deterministik (Fitur 1 & 2)**
+### **Langkah 3.4: Rule Engine Deterministik (Fitur 1 & 2)** `[PIC: Anggota 1]`
 
 Buat file `apps/backend/app/core/rule_engine.py`:
 
@@ -470,7 +464,7 @@ def evaluate_clearance_floor_price(hpp: float, days_since_last_sale: int, days_u
 
 ---
 
-### **Langkah 3.5: Main Application & Endpoint Prediksi (`main.py`)**
+### **Langkah 3.5: Main Application & Endpoint Prediksi (`main.py`)** `[PIC: Anggota 1]`
 
 Buat file `apps/backend/app/main.py`:
 
@@ -551,7 +545,7 @@ def get_restock_recommendation(
 
 ---
 
-### **Langkah 3.6: Dockerfile Backend**
+### **Langkah 3.6: Dockerfile Backend** `[PIC: Anggota 1]`
 
 Buat file `apps/backend/Dockerfile`:
 
@@ -575,7 +569,7 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 ---
 
-### **Verifikasi Tahap 3**
+### **Verifikasi Tahap 3** `[PIC: Anggota 1]`
 
 Latih model ML lokal terlebih dahulu:
 
@@ -602,11 +596,11 @@ git commit -m "feat(backend): pelatihan ml random forest, integrasi sqlalchemy, 
 
 ---
 
-## **Tahap 4: Agentic AI Engine & Tool Calling Gemini API (Fitur 3 Tawar.AI)**
+## **Tahap 4: Agentic AI Engine & Tool Calling Gemini API (Fitur 3 Tawar.AI)** `[PIC: Anggota 1 - AI/ML & Backend]`
 
 **Tujuan:** Membangun agen negosiasi B2B otonom berbasis Google Gemini 1.5 Flash API dengan Native Tool Calling (`process_negotiation`), yang mengevaluasi stok real-time DB, Dynamic Floor Price, serta mengelola state *Hybrid Handover* dan *Invoice Draft*.
 
-### **Langkah 4.1: Modul Normalisasi Teks Pasar**
+### **Langkah 4.1: Modul Normalisasi Teks Pasar** `[PIC: Anggota 1]`
 
 Buat file `apps/backend/app/services/text_normalizer.py`:
 
@@ -631,7 +625,7 @@ def normalize_market_text(text: str) -> str:
 
 ---
 
-### **Langkah 4.2: Tool Calling Agent Endpoint (`api/interact.py`)**
+### **Langkah 4.2: Tool Calling Agent Endpoint (`api/interact.py`)** `[PIC: Anggota 1]`
 
 Buat file `apps/backend/app/api/interact.py`:
 
@@ -822,7 +816,7 @@ def handle_interaction(req: InteractRequest, db: Session = Depends(get_db)):
 
 ---
 
-### **Langkah 4.3: Daftarkan Router pada `main.py`**
+### **Langkah 4.3: Daftarkan Router pada `main.py`** `[PIC: Anggota 1]`
 
 Perbarui `apps/backend/app/main.py` untuk mendaftarkan `interact_router`:
 
@@ -834,7 +828,7 @@ app.include_router(interact_router, prefix="/api/v1")
 
 ---
 
-### **Verifikasi Tahap 4**
+### **Verifikasi Tahap 4** `[PIC: Anggota 1]`
 
 Uji endpoint `/api/v1/interact` dengan penawaran tawar-menawar:
 
@@ -855,11 +849,11 @@ git commit -m "feat(ai): integrasi gemini API native tool calling, session hando
 
 ---
 
-## **Tahap 5: Frontend Chat-Centric PWA UI & Integrasi Dinamis**
+## **Tahap 5: Frontend Chat-Centric PWA UI & Integrasi Dinamis** `[PIC: Anggota 2 - Frontend & DevOps/Infra]`
 
 **Tujuan:** Menyediakan antarmuka chat PWA interaktif yang terhubung dinamis ke API backend (prediksi restok ML, percakapan AI, badge handover, serta modal Invoice Draft).
 
-### **Langkah 5.1: Configuration Vite Frontend**
+### **Langkah 5.1: Configuration Vite Frontend** `[PIC: Anggota 2]`
 
 Buat file `apps/frontend/package.json`:
 
@@ -882,7 +876,7 @@ Buat file `apps/frontend/package.json`:
 
 ---
 
-### **Langkah 5.2: Antarmuka Chat & Modal Invoice (`index.html`)**
+### **Langkah 5.2: Antarmuka Chat & Modal Invoice (`index.html`)** `[PIC: Anggota 2]`
 
 Buat file `apps/frontend/index.html`:
 
@@ -1032,7 +1026,7 @@ Buat file `apps/frontend/index.html`:
 
 ---
 
-### **Langkah 5.3: Dockerfile Frontend (Multi-Stage Build)**
+### **Langkah 5.3: Dockerfile Frontend (Multi-Stage Build)** `[PIC: Anggota 2]`
 
 Buat file `apps/frontend/Dockerfile`:
 
@@ -1053,7 +1047,7 @@ EXPOSE 80
 
 ---
 
-### **Verifikasi Tahap 5**
+### **Verifikasi Tahap 5** `[PIC: Anggota 2]`
 
 Commit Tahap 5:
 
@@ -1064,11 +1058,11 @@ git commit -m "feat(frontend): antarmuka pwa interaktif terhubung ke api backend
 
 ---
 
-## **Tahap 6: Orchestration Docker Compose Lengkap & Deliverables Lomba**
+## **Tahap 6: Orchestration Docker Compose Lengkap & Deliverables Lomba** `[PIC: Kolaborasi Bersama / Anggota 1 & 2]`
 
 **Tujuan:** Menggabungkan seluruh service (*MySQL*, *FastAPI Backend*, *Frontend Nginx*) dalam satu perintah orchestration dan menyiapkan berkas perlombaan.
 
-### **Langkah 6.1: File Final `docker-compose.yml`**
+### **Langkah 6.1: File Final `docker-compose.yml`** `[PIC: Anggota 2]`
 
 Perbarui file `docker-compose.yml` di root proyek:
 
@@ -1127,7 +1121,7 @@ volumes:
 
 ---
 
-### **Langkah 6.2: Workflow Eksekusi & Pengujian Integrasi Akhir**
+### **Langkah 6.2: Workflow Eksekusi & Pengujian Integrasi Akhir** `[PIC: Kolaborasi Bersama / Anggota 1 & 2]`
 
 Eksekusi seluruh sistem dengan satu perintah dari root folder:
 
@@ -1144,7 +1138,7 @@ Aplikasi akan menampilkan kartu notifikasi restok ML dan antarmuka chat negosias
 
 ---
 
-### **Checklist Submisi Penyisihan COMPFEST**
+### **Checklist Submisi Penyisihan COMPFEST** `[PIC: Kolaborasi Bersama / Anggota 1 & 2]`
 
 1. Push seluruh commit terakhir ke repositori GitHub publik.  
 2. Pastikan file `README.md` berisi panduan eksekusi `docker-compose up --build`.  
