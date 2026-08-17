@@ -853,26 +853,22 @@ git commit -m "feat(ai): integrasi gemini API native tool calling, session hando
 
 **Tujuan:** Menyediakan antarmuka chat PWA interaktif yang terhubung dinamis ke API backend (prediksi restok ML, percakapan AI, badge handover, serta modal Invoice Draft).
 
-### **Langkah 5.1: Configuration Vite Frontend** `[PIC: Anggota 2]`
+### **Langkah 5.1: Inisialisasi Proyek Vite Frontend** `[PIC: Anggota 2]`
 
-Buat file `apps/frontend/package.json`:
+Jalankan perintah inisialisasi Vite dengan template Vanilla JS langsung pada direktori `apps/frontend`:
 
-```json
-{
-  "name": "dagangpintar-frontend",
-  "private": true,
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "vite": "^5.1.0"
-  }
-}
+```bash
+# 1. Masuk ke direktori frontend
+cd apps/frontend
+
+# 2. Inisialisasi project Vite Vanilla JS secara non-interaktif
+npm create vite@latest . -- --template vanilla
+
+# 3. Install seluruh dependensi bawaan Vite
+npm install
 ```
+
+> **Catatan:** Perintah di atas akan secara otomatis menghasilkan struktur dasar proyek (`package.json`, `index.html`, dan folder `src/`).
 
 ---
 
