@@ -1,13 +1,147 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DagangPintar AI — Tawar.AI</title>
+  <!-- Script Tailwind CSS CDN Asli (Tanpa Markdown Error) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 h-screen flex flex-col justify-between">
+  <!-- Header App -->
+  <header class="bg-blue-600 text-white p-4 font-bold shadow-md flex justify-between items-center">
+    <div>
+      <h1 class="text-lg">DagangPintar AI</h1>
+      <p class="text-xs font-normal text-blue-100">Kulakan B2B — Grosir Berkah Jaya</p>
+    </div>
+    <span id="handover-badge" class="hidden bg-red-500 text-white text-xs px-2 py-1 rounded font-bold animate-pulse">
+      🚨 HYBRID HANDOVER KE PAK JONO
+    </span>
+  </header>
+
+  <!-- Dynamic Notification Card (Fitur 1 Restok ML) -->
+  <div id="restok-card" class="m-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded shadow-sm">
+    <p class="text-sm text-yellow-800 font-bold">Memuat Rekomendasi Restok ML...</p>
+  </div>
+
+  <!-- Container Chat Message -->
+  <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-3">
+    <div class="bg-white p-3 rounded-lg shadow max-w-xs">
+      <p class="text-xs text-blue-600 font-bold">Tawar.AI (Grosir Berkah Jaya)</p>
+      <p class="text-sm mt-1">Halo Bu Tejo! Ada yang bisa dibantu untuk kulakan hari ini?</p>
+    </div>
+  </div>
+
+  <!-- Modal Invoice Draft -->
+  <div id="invoice-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg p-6 max-w-sm w-full space-y-4 shadow-xl">
+      <h3 class="text-lg font-bold text-green-600">🎉 Kesepakatan Harga Dicapai!</h3>
+      <div id="invoice-details" class="text-sm space-y-2 text-gray-700"></div>
+      <p class="text-xs text-red-500 italic">*Harga dikunci selama 2 jam.</p>
+      <button onclick="closeInvoiceModal()"
+        class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold text-sm">Tutup & Simpan Draft</button>
+    </div>
+  </div>
+
+  <!-- Input Box Chat -->
+  <div class="p-4 bg-white border-t flex gap-2">
+    <input id="user-input" type="text" placeholder="Ketik penawaran... (mis. Saus Sambal 50 botol 6200)"
+      class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <button onclick="sendMessage()"
+      class="bg-blue-600 text-white px-5 py-2 rounded-lg font-bold text-sm hover:bg-blue-700">Kirim</button>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:8000/api/v1';
+
+    // 1. Fetch Dynamic Restock Prediction (Fitur 1)
+    async function loadRestockCard() {
+      try {
+        const res = await fetch(`${API_BASE}/restock-recommendation/SKU-01`);
+        const data = await res.json();
+        const card = document.getElementById('restok-card');
+        if (data.recommendation && data.recommendation.stockout_risk) {
+          card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-bold text-yellow-800">⚠️ Peringatan Restok: ${data.name}</p>
+                                <p class="text-xs text-yellow-700 mt-1">Stok Aktif: <b>${data.stock_active} unit</b>. Prediksi Permintaan ML: <b>${data.predicted_demand_daily} unit/hari</b>.</p>
+                                <p class="text-xs text-yellow-900 font-bold mt-1">Disarankan Pesan: ${data.recommendation.roq_cartons} Karton (${data.recommendation.roq_units} unit)</p>
+                            </div>
+                        </div>
+                    `;
+        }
+      } catch (err) { console.error("Gagal muat data restok", err); }
+    }
+    loadRestockCard();
+
+    // 2. Interaksi Chat AI (Fitur 3)
+    async function sendMessage() {
+      const inputEl = document.getElementById('user-input');
+      const chatBox = document.getElementById('chat-box');
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      // Render User Bubble
+      chatBox.innerHTML += `
+                <div class="bg-blue-500 text-white p-3 rounded-lg shadow max-w-xs ml-auto">
+                    <p class="text-sm">${text}</p>
+                </div>
+            `;
+      inputEl.value = '';
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      try {
+        const res = await fetch(`${API_BASE}/interact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: 'bu_tejo', message_text: text, sku_id: 'SKU-08' })
+        });
+        const data = await res.json();
+
+        // Render AI Bubble Response
+        chatBox.innerHTML += `
+                    <div class="bg-white p-3 rounded-lg shadow max-w-xs">
+                        <p class="text-xs text-blue-600 font-bold">Tawar.AI (Grosir)</p>
+                        <p class="text-sm mt-1">${data.ai_response_text}</p>
+                    </div>
+                `;
+
+        // Handle Handover Flag
+        if (data.handover_flag) {
+          document.getElementById('handover-badge').classList.remove('hidden');
+        }
+
+        // Handle Invoice Draft
+        if (data.invoice_draft) {
+          showInvoiceModal(data.invoice_draft);
+        }
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch (err) {
+        console.error("Error interact API", err);
+      }
+    }
+
+    function showInvoiceModal(inv) {
+      const modal = document.getElementById('invoice-modal');
+      const details = document.getElementById('invoice-details');
+      details.innerHTML = `
+                <p><b>ID Invoice:</b> ${inv.invoice_id}</p>
+                <p><b>Item:</b> ${inv.sku_name} (${inv.quantity} unit)</p>
+                <p><b>Harga Sepakat:</b> Rp${inv.agreed_price.toLocaleString('id-ID')}/unit</p>
+                <p class="text-base font-bold text-blue-600 mt-2">Total: Rp${inv.total_amount.toLocaleString('id-ID')}</p>
+                <p class="text-xs text-gray-500">Berlaku Hingga: ${inv.expires_at}</p>
+            `;
+      modal.classList.remove('hidden');
+    }
+
+    function closeInvoiceModal() {
+      document.getElementById('invoice-modal').classList.add('hidden');
+    }
+  </script>
+</body>
+
 </html>
