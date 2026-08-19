@@ -1,7 +1,7 @@
 # Implementation Plan: Frontend Engineer & DevOps/Infra (Anggota 2)
 
 > **Dokumen Pelacakan & Rencana Eksekusi Mandiri — Frontend**  
-> **Status:** Draft Ready for Execution | **Fokus:** Tahap 5 & Tahap 6 (Frontend)  
+> **Status:** In Progress (UI & Integrasi Selesai, Menunggu Dockerfile) | **Fokus:** Tahap 5 & Tahap 6 (Frontend)  
 > **Acuan Utama:** [workflow_and_execution_plan.md](file:///c:/Users/rilob/KOMPETISI/dagangpintar-ai/workflow_and_execution_plan.md) & [PRD_DagangPintar_AI.md](file:///c:/Users/rilob/KOMPETISI/dagangpintar-ai/PRD_DagangPintar_AI.md)
 
 ---
@@ -65,9 +65,9 @@ Sebagai **Frontend Engineer & DevOps/Infra**, ruang lingkup pengerjaan mencakup 
 
 | Komponen / Fitur | Metode Verifikasi | Ekspektasi Hasil | Status |
 |---|---|---|---|
-| Inisialisasi Vite | `npm run dev` | Server Vite berjalan di `http://localhost:5173` | Pending |
-| Restock Card Binding | HTTP GET ke `/api/v1/restock-recommendation/SKU-01` | Peringatan stok tampil jika stok aktif di bawah ambang buffer | Pending |
-| Chat Interaction | HTTP POST ke `/api/v1/interact` | Balasan percakapan Tawar.AI tampil di bubble chat | Pending |
-| Handover Badge | Uji 3x penawaran di bawah floor price | Badge merah "🚨 HYBRID HANDOVER" muncul dan berkedip | Pending |
-| Modal Invoice Draft | Uji penawaran yang diterima (`ACCEPT`) | Pop-up modal invoice muncul dengan rincian harga & timer 2 jam | Pending |
-| Docker Build | `docker build -t dagangpintar_frontend apps/frontend` | Image Nginx berhasil di-build tanpa error bundling | Pending |
+| Inisialisasi Vite | `npm run dev` | Server Vite berjalan di `http://localhost:5173` | [x] Selesai |
+| Restock Card Binding | HTTP GET ke `/api/v1/restock-recommendation/SKU-01` | Peringatan stok tampil jika stok aktif di bawah ambang buffer | [x] Selesai (Kode Terimplementasi) |
+| Chat Interaction | HTTP POST ke `/api/v1/interact` | Balasan percakapan Tawar.AI tampil di bubble chat | [x] Selesai (Kode Terimplementasi) |
+| Handover Badge | Uji 3x penawaran di bawah floor price | Badge merah "🚨 HYBRID HANDOVER" muncul dan berkedip | [x] Selesai (Kode Terimplementasi) |
+| Modal Invoice Draft | Uji penawaran yang diterima (`ACCEPT`) | Pop-up modal invoice muncul dengan rincian harga & timer 2 jam | [x] Selesai (Kode Terimplementasi) |
+| Docker Build | `docker build -t dagangpintar_frontend apps/frontend` | Image Nginx berhasil di-build tanpa error bundling | [ ] Pending |
